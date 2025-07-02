@@ -1,0 +1,28 @@
+version: '3.8'
+
+volumes:
+  rc-db:
+
+networks:
+  rc-backend:
+
+services:
+  rc-mysql-dev:
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=gorc
+      - MYSQL_DATABASE_NAME=im
+      - MYSQL_USERNAME=gochat
+      - MYSQL_PASSWORD=gochat
+    volumes:
+      - rc-db:/var/lib/mysql
+    networks:
+      - rc-backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 6s
+      timeout: 3s
+      retries: 3
