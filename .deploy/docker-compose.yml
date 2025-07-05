@@ -2,6 +2,9 @@ version: '3.8'
 
 volumes:
   rc-db:
+    name: "rc-mysql-db"
+  rc-rd:
+    name: "rc-redis-db"
 
 networks:
   rc-backend:
@@ -24,6 +27,24 @@ services:
       - rc-backend
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 6s
+      timeout: 3s
+      retries: 3
+
+  redis:
+    container_name: rc-redis-dev
+    image: redis:8.0
+    restart: unless-stopped
+    ports: 
+      - "6379:6379"
+    command: ["redis-server","/usr/local/etc/redis/redis.conf"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:rw
+      - rc-rd:/data
+    networks:
+      - rc-backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "gochat", "ping"]
       interval: 6s
       timeout: 3s
       retries: 3
