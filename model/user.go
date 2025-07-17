@@ -1,26 +1,96 @@
 package model
 
-import "time"
-
+// entity for user and user_detail table
 type User struct {
-	UserId     int64     `json:"userId"`
-	UserName   string    `json:"userName"`
-	Password   string    `json:"password"`
-	Email      string    `json:"email"`
-	CreateTime time.Time `json:"createTime"`
-	UpdateTime time.Time `json:"updateTime"`
-	Deleted    int64     `json:"deleted"`
+	UserId       int64  `json:"userId"`       // 用户账号
+	UserName     string `json:"userName"`     // 用户名
+	UserPassword string `json:"userPassword"` // 用户登录密码
+	UserEmail    string `json:"userEmail"`    // 用户邮箱
+	UserPhone    string `json:"userPhone"`    // 用户手机
+	UserGender   string `json:"userGender"`   // 用户性别
+	UserAge      int    `json:"userAge"`      // 用户年龄
+	UserAddress  string `json:"userAddress"`  // 用户地址
+	UserLocation string `json:"userLocation"` // 用户所在地
+	UserAvatar   string `json:"userAvatar"`   // 用户头像
+	Deleted      int64  `json:"deleted"`      // 用户注销软删除
 }
 
-type UserDTO struct {
-	UserId       int64  `json:"userId"`
-	UserName     string `json:"userName" valid:"min=6"`
+type UserBasic struct {
+	UserId   int64  `json:"userId"`
+	UserName string `json:"userName"`
+}
+
+type SignupReq struct {
+	UserName     string `json:"userName" valid:"required,min=1,max=16"`
 	UserPassword string `json:"userPassword" valid:"required,min=8,max=20"`
-	UserEmail    string `json:"userEmail" valid:"required,email"`
 }
 
-type UserVO struct {
-	UserId    int64  `json:"userId"`
-	UserName  string `json:"userName"`
-	UserEmail string `json:"userEmail"`
+type SignupRes struct {
+	UserId string `json:"userId"`
+}
+
+type LoginReq struct {
+	UserId       string `json:"userId" valid:"required,number,min=6"`
+	UserPassword string `json:"userPassword" valid:"required,min=8,max=20"`
+}
+
+type LoginRes struct {
+	UserId       string `json:"userId"`
+	UserName     string `json:"userName"`
+	UserEmail    string `json:"userEmail"`
+	UserPhone    string `json:"userPhone"`
+	UserGender   string `json:"userGender"`
+	UserAge      int    `json:"userAge"`
+	UserAddress  string `json:"userAddress"`
+	UserLocation string `json:"userLocation"`
+	UserAvatar   string `json:"userAvatar"`
+}
+
+type UpdateInfoReq struct {
+	UserId       string `json:"userId" valid:"required,number,min=6"`
+	UserName     string `json:"userName"`
+	UserEmail    string `json:"userEmail"`
+	UserPhone    string `json:"userPhone"`
+	UserGender   string `json:"userGender"`
+	UserAge      int    `json:"userAge"`
+	UserAddress  string `json:"userAddress"`
+	UserLocation string `json:"userLocation"`
+	UserAvatar   string `json:"userAvatar"`
+}
+
+type UpdateInfoRes struct {
+	UserName     string `json:"userName"`
+	UserEmail    string `json:"userEmail"`
+	UserPhone    string `json:"userPhone"`
+	UserGender   string `json:"userGender"`
+	UserAge      int    `json:"userAge"`
+	UserAddress  string `json:"userAddress"`
+	UserLocation string `json:"userLocation"`
+	UserAvatar   string `json:"userAvatar"`
+}
+
+type GetUserdetailRes struct {
+	UserId       string `json:"userId"`
+	UserName     string `json:"userName"`
+	UserEmail    string `json:"userEmail"`
+	UserPhone    string `json:"userPhone"`
+	UserGender   string `json:"userGender"`
+	UserAge      int    `json:"userAge"`
+	UserAddress  string `json:"userAddress"`
+	UserLocation string `json:"userLocation"`
+	UserAvatar   string `json:"userAvatar"`
+}
+
+type SearchUserReq struct {
+	CurrentPage int    `json:"currentPage" valid:"required,min=1"`
+	PageSize    int    `json:"pageSize" valid:"required,min=1,max=8"`
+	UserId      string `json:"userId"`
+	UserName    string `json:"userName"`
+}
+
+type SearchUserRes struct {
+	CurrentPage int         `json:"currentPage"`
+	PageSize    int         `json:"pageSize" `
+	Total       int         `json:"total"`
+	Items       []UserBasic `json:"items"`
 }

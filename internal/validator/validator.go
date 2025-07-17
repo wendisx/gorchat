@@ -18,8 +18,10 @@ const (
 	MIN      = "min"
 	REQUIRED = "required"
 	EMAIL    = "email"
+	NUMBER   = "number"
 
-	EMAIL_FROMAT = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	EMAIL_FROMAT  = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	NUMBER_FORMAT = `^\d+$`
 )
 
 type validatorError struct {
@@ -87,6 +89,16 @@ func (va *Validator) registerBuiltinValidators() {
 		}
 		emailRegex := regexp.MustCompile(EMAIL_FROMAT)
 		return emailRegex.MatchString(email)
+	}
+
+	// 检测是否为纯数字构成
+	va.validators[NUMBER] = func(value any, param string) bool {
+		number, ok := value.(string)
+		if !ok {
+			return false
+		}
+		numberRegex := regexp.MustCompile(NUMBER_FORMAT)
+		return numberRegex.MatchString(number)
 	}
 }
 

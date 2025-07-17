@@ -23,25 +23,25 @@ func NewResponser() Response {
 // 成功响应
 func (res *response) Success(ctx echo.Context, httpCode int, msg string, data any) error {
 	return ctx.JSON(httpCode, struct {
-		code    int    `json:"code"`
-		message string `json:"message"`
-		data    any    `json:"data"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Data    any    `json:"data"`
 	}{
-		code:    constant.SUCCESS_CODE,
-		message: msg,
-		data:    data,
+		Code:    constant.SUCCESS_CODE,
+		Message: msg,
+		Data:    data,
 	})
 }
 
 // 失败响应
 func (res *response) Fail(ctx echo.Context, httpCode int, code int, msg string) error {
 	return ctx.JSON(httpCode, struct {
-		code    int    `json:"code"`
-		message string `json:"message"`
-		data    any    `json:"data"`
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Data    any    `json:"data"`
 	}{
-		code:    code,
-		message: msg,
-		data:    nil,
+		Code:    code,
+		Message: msg,
+		Data:    nil,
 	})
 }

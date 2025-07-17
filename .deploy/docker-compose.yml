@@ -5,9 +5,12 @@ volumes:
     name: "rc-mysql-db"
   rc-rd:
     name: "rc-redis-db"
+  rc-kfk:
+    name: "rc-kafka"
 
 networks:
   rc-backend:
+    driver: bridge
 
 services:
   mysql:

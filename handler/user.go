@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -16,6 +17,8 @@ type UserHandler interface {
 	Login(c echo.Context) error
 	UpdateInfo(c echo.Context) error
 	Delete(c echo.Context) error
+	GetUserdetail(c echo.Context) error
+	SearchUser(c echo.Context) error
 }
 
 type userHandler struct {
@@ -34,77 +37,88 @@ func NewUserHandler(ucase usecase.UserUsecase, res model.Response) UserHandler {
 
 func (h *userHandler) Signup(c echo.Context) error {
 	// 断言一定成功，逻辑没问题，预期也差不多，但是不建议
-	signupInfo := c.Get("body").(*model.UserDTO)
-	signupUser := model.User{
-		UserName: signupInfo.UserName,
-		Password: signupInfo.UserPassword,
-		Email:    signupInfo.UserEmail,
-	}
-	userId, err := h.ucase.Signup(signupUser)
+	signupReq := c.Get("body").(*model.SignupReq)
+	userId, err := h.ucase.Signup(signupReq.UserName, signupReq.UserPassword)
 	if err != nil {
+		// 可以考虑更高层次的错误封装
 		if derr, ok := err.(*model.DError); ok {
 			return h.res.Fail(c, http.StatusBadRequest, int(derr.Code), derr.Message)
 		} else {
 			return err
 		}
 	}
-	return h.res.Success(c, http.StatusOK, constant.MsgSignupSuccess, model.UserVO{
-		UserId:    userId,
-		UserName:  signupInfo.UserName,
-		UserEmail: signupInfo.UserEmail,
+	return h.res.Success(c, http.StatusOK, constant.MsgUserSignupSuccess, model.SignupRes{
+		UserId: strconv.FormatInt(userId, 10),
 	})
 }
 
 func (h *userHandler) Login(c echo.Context) error {
-	loginInfo := c.Get("body").(*model.UserDTO)
-	loginUser := model.User{
-		UserId:   loginInfo.UserId,
-		UserName: loginInfo.UserName,
-		Password: loginInfo.UserPassword,
-		Email:    loginInfo.UserEmail,
-	}
-	user, err := h.ucase.Login(loginUser)
-	if err != nil {
+	loginReq := c.Get("body").(*model.LoginReq)
+	user, err := h.ucase.Login(loginReq.UserId, loginReq.UserPassword)
+	if err != nil && user == nil {
 		if derr, ok := err.(*model.DError); ok {
-			return h.res.Fail(c, http.StatusInternalServerError, int(derr.Code), derr.Message)
+			return h.res.Fail(c, http.StatusNotFound, int(derr.Code), derr.Message)
+		} else {
+			return err
 		}
 	}
-	return h.res.Success(c, http.StatusOK, constant.MsgLoginSuccess, model.UserVO{
-		UserId:    user.UserId,
-		UserName:  user.UserName,
-		UserEmail: user.Email,
-	})
+	loginRes := model.LoginRes{
+		UserId:       strconv.FormatInt(user.UserId, 10),
+		UserName:     user.UserName,
+		UserEmail:    user.UserEmail,
+		UserPhone:    user.UserPhone,
+		UserGender:   user.UserGender,
+		UserAge:      user.UserAge,
+		UserAddress:  user.UserAddress,
+		UserLocation: user.UserLocation,
+		UserAvatar:   user.UserAvatar,
+	}
+	return h.res.Success(c, http.StatusOK, constant.MsgUserLoginSuccess, loginRes)
 }
 
 func (h *userHandler) UpdateInfo(c echo.Context) error {
-	newInfo := c.Get("body").(*model.UserDTO)
-	newUserInfo := model.User{
-		UserId:   newInfo.UserId,
-		UserName: newInfo.UserName,
-		Password: newInfo.UserPassword,
-		Email:    newInfo.UserEmail,
-	}
-	newUser, err := h.ucase.UpdateInfo(newUserInfo)
+	updateInfoReq := c.Get("body").(*model.UpdateInfoReq)
+	userid, err := strconv.Atoi(updateInfoReq.UserId)
 	if err != nil {
+		return h.res.Fail(c, http.StatusBadRequest, int(constant.ErrBadRequest), constant.MsgBadRequest)
+	}
+	updateUser := &model.User{
+		UserId:       int64(userid),
+		UserName:     updateInfoReq.UserName,
+		UserEmail:    updateInfoReq.UserEmail,
+		UserPhone:    updateInfoReq.UserPhone,
+		UserGender:   updateInfoReq.UserGender,
+		UserAge:      updateInfoReq.UserAge,
+		UserAddress:  updateInfoReq.UserAddress,
+		UserLocation: updateInfoReq.UserLocation,
+		UserAvatar:   updateInfoReq.UserAvatar,
+	}
+	user, err := h.ucase.UpdateInfo(updateUser)
+	if err != nil || user == nil {
 		if derr, ok := err.(*model.DError); ok {
 			return h.res.Fail(c, http.StatusInternalServerError, int(derr.Code), derr.Message)
 		}
 	}
-	return h.res.Success(c, http.StatusOK, constant.MsgUpdateInfoSuccess, model.UserVO{
-		UserId:    newUser.UserId,
-		UserName:  newUser.UserName,
-		UserEmail: newUser.Email,
-	})
+	updateInfoRes := model.UpdateInfoRes{
+		UserName:     user.UserName,
+		UserEmail:    user.UserEmail,
+		UserPhone:    user.UserPhone,
+		UserGender:   user.UserGender,
+		UserAge:      user.UserAge,
+		UserAddress:  user.UserAddress,
+		UserLocation: user.UserLocation,
+		UserAvatar:   user.UserAvatar,
+	}
+	return h.res.Success(c, http.StatusOK, constant.MsgUserUpdateSuccess, updateInfoRes)
 }
 
 func (h *userHandler) Delete(c echo.Context) error {
+	userIdRegex := regexp.MustCompile(`^\d+$`)
 	userIdStr := c.QueryParam("userId")
-	if userIdStr == "" {
-		return h.res.Fail(c, http.StatusBadRequest, constant.FAIL_CODE, constant.MsgBadRequest)
-	}
+	ok := userIdRegex.MatchString(userIdStr)
 	userId, err := strconv.Atoi(userIdStr)
-	if err != nil {
-		return err
+	if userIdStr == "" || !ok || err != nil {
+		return h.res.Fail(c, http.StatusBadRequest, int(constant.ErrBadRequest), constant.MsgBadRequest)
 	}
 	err = h.ucase.Delete(int64(userId))
 	if err != nil {
@@ -112,5 +126,63 @@ func (h *userHandler) Delete(c echo.Context) error {
 			return h.res.Fail(c, http.StatusInternalServerError, int(derr.Code), derr.Message)
 		}
 	}
-	return h.res.Success(c, http.StatusOK, constant.MsgDeleteSuccess, nil)
+	return h.res.Success(c, http.StatusOK, constant.MsgUserDeleteSuccess, nil)
+}
+
+func (h *userHandler) GetUserdetail(c echo.Context) error {
+	userIdRegex := regexp.MustCompile(`^\d+$`)
+	userIdStr := c.QueryParam("userId")
+	ok := userIdRegex.MatchString(userIdStr)
+	userId, err := strconv.Atoi(userIdStr)
+	if userIdStr == "" || !ok || err != nil {
+		return h.res.Fail(c, http.StatusBadRequest, int(constant.ErrBadRequest), constant.MsgBadRequest)
+	}
+	user, err := h.ucase.GetUserDetail(int64(userId))
+	if err != nil {
+		return err
+	}
+	getUserdetailRes := model.GetUserdetailRes{
+		UserId:       strconv.FormatInt(user.UserId, 10),
+		UserName:     user.UserName,
+		UserEmail:    user.UserEmail,
+		UserPhone:    user.UserPhone,
+		UserGender:   user.UserGender,
+		UserAge:      user.UserAge,
+		UserAddress:  user.UserAddress,
+		UserLocation: user.UserLocation,
+		UserAvatar:   user.UserAvatar,
+	}
+	return h.res.Success(c, http.StatusOK, constant.MsgGetUserDetailSuccess, getUserdetailRes)
+}
+
+func (h *userHandler) SearchUser(c echo.Context) error {
+	searchUserReq := c.Get("body").(*model.SearchUserReq)
+	var userBasic model.UserBasic
+	userBasic.UserName = searchUserReq.UserName
+	userIdRegex := regexp.MustCompile(`^\d+$`)
+	ok := userIdRegex.MatchString(searchUserReq.UserId)
+	if !ok {
+		userBasic.UserId = 0
+	} else {
+		userId, err := strconv.Atoi(searchUserReq.UserId)
+		if err != nil {
+			return h.res.Fail(c, http.StatusBadRequest, int(constant.ErrBadRequest), constant.MsgBadRequest)
+		}
+		userBasic.UserId = int64(userId)
+	}
+	page := &model.Page[model.UserBasic]{
+		CurrentPage: searchUserReq.CurrentPage,
+		PageSize:    searchUserReq.PageSize,
+	}
+	err := h.ucase.SearchUsers(userBasic.UserId, userBasic.UserName, page)
+	if err != nil {
+		return err
+	}
+	searchUserRes := model.SearchUserRes{
+		CurrentPage: page.CurrentPage,
+		PageSize:    page.PageSize,
+		Total:       page.Total,
+		Items:       page.Items,
+	}
+	return h.res.Success(c, http.StatusOK, constant.MsgSearchUserSuccess, searchUserRes)
 }

@@ -34,13 +34,14 @@ func NewLogger(level constant.LogLevel) SimpleLogger {
 	cfg := NewLoggerConfig()
 	logger, err := cfg.Build()
 	if err != nil {
-		log.Fatalf("[init] -- (internal/logger) status: fail")
+		log.Fatalf("[init] -- (internal/logger) status: fail\n")
 	} else {
-		log.Printf("[init] -- (internal/logger) status: success")
+		log.Printf("[init] -- (internal/logger) status: success\n")
 	}
 	return logger
 }
 
+// 内部核心日志处理
 func Log(level constant.LogLevel, logger Logger, motion string, status int, ext map[string]any) {
 	statusStr := constant.STATUS_FAIL
 	if status == 0 {
@@ -83,6 +84,7 @@ func Log(level constant.LogLevel, logger Logger, motion string, status int, ext 
 			kv...,
 		)
 	default:
+		log.Printf("[run] -- (internal/logger) status: fail\n")
 	}
 }
 

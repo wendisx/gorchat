@@ -45,8 +45,8 @@ func globalErrorHandler(e error, c echo.Context) {
 		err = c.JSON(
 			http.StatusInternalServerError,
 			map[string]any{
-				"code":    constant.ErrValidator,
-				"message": constant.MsgValidatorFail,
+				"code":    constant.ErrValidate,
+				"message": constant.MsgValidateFail,
 				"data":    nil,
 			},
 		)

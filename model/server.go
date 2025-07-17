@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
+	"github.com/wendisx/gorchat/config/middleware"
 	"github.com/wendisx/gorchat/internal/log"
 )
 
@@ -14,4 +15,5 @@ type Dependency struct {
 	Logger      log.Logger
 	RedisClient *redis.Client
 	Response    Response
+	MiddleWare  middleware.Middleware
 }

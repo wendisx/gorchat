@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/wendisx/gorchat/internal/constant"
@@ -13,10 +14,12 @@ import (
 
 type UserUsecase interface {
 	GetLogger() log.Logger
-	Signup(user model.User) (int64, error)
-	Login(loginUser model.User) (model.User, error)
-	UpdateInfo(newInfo model.User) (model.User, error)
+	Signup(userName string, userPassword string) (int64, error)
+	Login(userId string, userPassword string) (*model.User, error)
+	UpdateInfo(user *model.User) (*model.User, error)
 	Delete(userId int64) error
+	GetUserDetail(userId int64) (*model.User, error)
+	SearchUsers(userId int64, userName string, page *model.Page[model.UserBasic]) error
 }
 
 type userUsecase struct {
@@ -39,80 +42,80 @@ func (u *userUsecase) GetLogger() log.Logger {
 	return u.Logger
 }
 
-func (u *userUsecase) Signup(user model.User) (int64, error) {
+func (u *userUsecase) Signup(userName string, userPassword string) (int64, error) {
 	ctx, cancel := context.WithTimeout(u.c, u.t)
 	defer cancel()
-	// block when exist user
-	_, err := u.repo.FindOneByEmail(ctx, user.Email)
-	if err == nil {
-		return -1, &model.DError{
-			Code:    constant.ErrUserExist,
-			Message: constant.MsgUserExist,
-		}
-	}
-	// bypass when not exist user
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	// 由于账号才是唯一标识，注册时并不允许直接传递账号，账号尝试自动生成
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(userPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return -1, &model.DError{
 			Code:    constant.ErrSignupFail,
 			Message: constant.MsgSignupFail,
 		}
 	}
-	user.Password = string(hashPassword)
-	userId, err := u.repo.InsertOne(ctx, user)
-	if err != nil {
+	var user *model.User
+	userPassword = string(hashPassword)
+	user, err = u.repo.InsertOne(ctx, &model.User{
+		UserName:     userName,
+		UserPassword: userPassword,
+	})
+	if err != nil && user == nil {
 		return -1, &model.DError{
 			Code:    constant.ErrSignupFail,
 			Message: constant.MsgSignupFail,
 		}
 	}
-	return userId, nil
+	return user.UserId, nil
 }
 
-func (u *userUsecase) Login(loginUser model.User) (model.User, error) {
+func (u *userUsecase) Login(userId string, userPassword string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(u.c, u.t)
 	defer cancel()
-	var user model.User
-	var err error
+	// 转换账号类型
+	userid, err := strconv.Atoi(userId)
+	if err != nil {
+		return nil, &model.DError{
+			Code:    constant.ErrArgument,
+			Message: constant.MsgArgumentErr,
+		}
+	}
+	var user *model.User
 	// 带着 userId 登录意味着刚刚注册存在 signup 返回的 userId
 	// 带着 userId 的请求忽略登录时的账号或者邮箱字段,因为 userId 唯一
-	if loginUser.UserId > 0 {
-		user, err = u.repo.FindOneById(ctx, loginUser.UserId)
-	} else {
-		user, err = u.repo.FindOneByEmail(ctx, loginUser.Email)
-	}
-	if err != nil {
-		return user, &model.DError{
+	user, err = u.repo.FindOneById(ctx, int64(userid))
+	if err != nil && user == nil {
+		return nil, &model.DError{
 			Code:    constant.ErrUserNotExist,
 			Message: constant.MsgUserNotExist,
 		}
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginUser.Password))
+	// 校验密码
+	err = bcrypt.CompareHashAndPassword([]byte(user.UserPassword), []byte(userPassword))
+	// 密码校验失败
 	if err != nil {
-		return user, &model.DError{
-			Code:    constant.ErrPasswordAuth,
-			Message: constant.MsgPasswordAuth,
+		return nil, &model.DError{
+			Code:    constant.ErrPasswordAuthFail,
+			Message: constant.MsgPasswordAuthFail,
 		}
 	}
 	return user, nil
 }
 
-func (u *userUsecase) UpdateInfo(newInfo model.User) (model.User, error) {
+func (u *userUsecase) UpdateInfo(user *model.User) (*model.User, error) {
 	ctx, cancle := context.WithTimeout(u.c, u.t)
 	defer cancle()
-	var user model.User
-	_, err := u.repo.FindOneById(ctx, newInfo.UserId)
-	if err != nil {
+	tuser, err := u.repo.FindOneById(ctx, user.UserId)
+	if err != nil || tuser == nil {
 		return user, &model.DError{
 			Code:    constant.ErrUserNotExist,
 			Message: constant.MsgUserNotExist,
 		}
 	}
-	user, err = u.repo.UpdateOneById(ctx, newInfo)
-	if err != nil {
+	user, err = u.repo.UpdateOneById(ctx, user)
+	if err != nil || user == nil {
 		return user, &model.DError{
-			Code:    constant.ErrUpdateFail,
-			Message: constant.MsgUpdateFail,
+			Code:    constant.ErrUserUpdateFail,
+			Message: constant.MsgUserUpdateFail,
 		}
 	}
 	return user, nil
@@ -121,18 +124,48 @@ func (u *userUsecase) UpdateInfo(newInfo model.User) (model.User, error) {
 func (u *userUsecase) Delete(userId int64) error {
 	ctx, cancle := context.WithTimeout(u.c, u.t)
 	defer cancle()
-	_, err := u.repo.FindOneById(ctx, userId)
-	if err != nil {
+	tuser, err := u.repo.FindOneById(ctx, userId)
+	if err != nil && tuser == nil {
 		return &model.DError{
 			Code:    constant.ErrUserNotExist,
 			Message: constant.MsgUserNotExist,
 		}
 	}
-	err = u.repo.DeleteById(ctx, userId)
+	err = u.repo.DeleteOneById(ctx, userId)
 	if err != nil {
 		return &model.DError{
-			Code:    constant.ErrDeleteFail,
-			Message: constant.MsgDeleteFail,
+			Code:    constant.ErrUserDeleteFail,
+			Message: constant.MsgUserDeleteFail,
+		}
+	}
+	return nil
+}
+
+func (u *userUsecase) GetUserDetail(userId int64) (*model.User, error) {
+	ctx, cancle := context.WithTimeout(u.c, u.t)
+	defer cancle()
+	user, err := u.repo.FindOneById(ctx, userId)
+	if err != nil && user == nil {
+		return nil, &model.DError{
+			Code:    constant.ErrGetUserDetail,
+			Message: constant.MsgGetUserDetailFail,
+		}
+	}
+	return user, nil
+}
+
+func (u *userUsecase) SearchUsers(userId int64, userName string, page *model.Page[model.UserBasic]) error {
+	ctx, cancle := context.WithTimeout(u.c, u.t)
+	defer cancle()
+	userBasic := model.UserBasic{
+		UserId:   userId,
+		UserName: userName,
+	}
+	err := u.repo.FindBasicLists(ctx, userBasic, page)
+	if err != nil {
+		return &model.DError{
+			Code:    constant.ErrSearchUser,
+			Message: constant.MsgSearchUserFail,
 		}
 	}
 	return nil
