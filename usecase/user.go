@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/wendisx/gorchat/internal/constant"
@@ -15,7 +14,7 @@ import (
 type UserUsecase interface {
 	GetLogger() log.Logger
 	Signup(userName string, userPassword string) (int64, error)
-	Login(userId string, userPassword string) (*model.User, error)
+	Login(userId int64, userPassword string) (*model.User, error)
 	UpdateInfo(user *model.User) (*model.User, error)
 	Delete(userId int64) error
 	GetUserDetail(userId int64) (*model.User, error)
@@ -24,7 +23,7 @@ type UserUsecase interface {
 
 type userUsecase struct {
 	repo   repository.UserRepository
-	Logger log.Logger
+	logger log.Logger
 	c      context.Context
 	t      time.Duration
 }
@@ -32,14 +31,14 @@ type userUsecase struct {
 func NewUserUsecase(repo repository.UserRepository) UserUsecase {
 	return &userUsecase{
 		repo:   repo,
-		Logger: repo.GetLogger(),
-		c:      context.TODO(),
-		t:      10 * time.Second,
+		logger: repo.GetLogger(),
+		c:      context.Background(),
+		t:      5 * time.Second,
 	}
 }
 
 func (u *userUsecase) GetLogger() log.Logger {
-	return u.Logger
+	return u.logger
 }
 
 func (u *userUsecase) Signup(userName string, userPassword string) (int64, error) {
@@ -68,21 +67,14 @@ func (u *userUsecase) Signup(userName string, userPassword string) (int64, error
 	return user.UserId, nil
 }
 
-func (u *userUsecase) Login(userId string, userPassword string) (*model.User, error) {
+func (u *userUsecase) Login(userId int64, userPassword string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(u.c, u.t)
 	defer cancel()
-	// 转换账号类型
-	userid, err := strconv.Atoi(userId)
-	if err != nil {
-		return nil, &model.DError{
-			Code:    constant.ErrArgument,
-			Message: constant.MsgArgumentErr,
-		}
-	}
 	var user *model.User
+	var err error
 	// 带着 userId 登录意味着刚刚注册存在 signup 返回的 userId
 	// 带着 userId 的请求忽略登录时的账号或者邮箱字段,因为 userId 唯一
-	user, err = u.repo.FindOneById(ctx, int64(userid))
+	user, err = u.repo.FindOneById(ctx, userId)
 	if err != nil && user == nil {
 		return nil, &model.DError{
 			Code:    constant.ErrUserNotExist,

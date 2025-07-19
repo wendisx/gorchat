@@ -14,6 +14,7 @@ type Row = sql.Row
 type Rows = sql.Rows
 
 type DBTX interface {
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 	Exec(query string, args ...any) (Result, error)
 	ExecContext(ctx context.Context, query string, args ...any) (Result, error)
 	Query(query string, args ...any) (*Rows, error)

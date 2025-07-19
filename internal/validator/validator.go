@@ -66,6 +66,8 @@ func (va *Validator) registerBuiltinValidators() {
 			return len(t) >= minValue
 		case int:
 			return t >= minValue
+		case int64:
+			return t >= int64(minValue)
 		}
 		return false
 	}

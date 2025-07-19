@@ -5,6 +5,18 @@
 set NAMES 'utf8mb4';
 set FOREIGN_KEY_CHECKS = 0;
 
+-- 用户表
+DROP TABLE IF EXISTS `im_users`;
+CREATE TABLE `im_users` (
+  `user_id` bigint PRIMARY KEY auto_increment COMMENT '用户账号',
+  `user_name` varchar(64) not null COMMENT '用户昵称',
+  `user_password` varchar(64) not null COMMENT '用户密码',
+  `created_time` timestamp default current_timestamp COMMENT '用户创建时间',
+  `updated_time` timestamp default current_timestamp on update current_timestamp COMMENT '用户修改时间',
+  `deleted` int default 0 COMMENT '逻辑删除',
+  index i_user_name(user_name)
+)ENGINE=InnoDB auto_increment=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- 用户详细信息表
 DROP TABLE IF EXISTS `im_users_detail`;
 CREATE TABLE `im_users_detail` (
@@ -22,18 +34,6 @@ CREATE TABLE `im_users_detail` (
   constraint `age_check` check ((`age` >=0 and `age` <= 150)),
   constraint `fk_ud_to_user` FOREIGN KEY (`user_id`) REFERENCES `im_users` (`user_id`) on delete cascade
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- 用户表
-DROP TABLE IF EXISTS `im_users`;
-CREATE TABLE `im_users` (
-  `user_id` bigint PRIMARY KEY auto_increment COMMENT '用户账号',
-  `user_name` varchar(64) not null COMMENT '用户昵称',
-  `user_password` varchar(64) not null COMMENT '用户密码',
-  `created_time` timestamp default current_timestamp COMMENT '用户创建时间',
-  `updated_time` timestamp default current_timestamp on update current_timestamp COMMENT '用户修改时间',
-  `deleted` int default 0 COMMENT '逻辑删除',
-  index i_user_name(user_name)
-)ENGINE=InnoDB auto_increment=100000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 用户职责表
 DROP TABLE IF EXISTS `im_users_role`;
@@ -78,7 +78,7 @@ CREATE TABLE `im_groups_detail` (
 DROP TABLE IF EXISTS `im_groups_users`;
 CREATE TABLE `im_groups_users` (
   `group_id` bigint COMMENT '群号',
-  `user_id` bigint COMMENT '用户账号',
+  `user_id` bigint not null COMMENT '用户账号',
   `group_nickname` varchar(32) default '' COMMENT '群别称',
   `user_nickname` varchar(32) default '' COMMENT '用户别称',
   `user_role` int default 3  COMMENT '用户职责',
@@ -126,23 +126,6 @@ insert into `im_dialog`(`dialog_name`) values ('group');
 insert into `im_dialog`(`dialog_name`) values ('broadcast');
 insert into `im_dialog`(`dialog_name`) values ('community');
 
--- 历史消息
-DROP TABLE IF EXISTS `im_timeline`;
-CREATE TABLE `im_timeline` (
-  `timeline_id` bigint COMMENT '时间线标识',
-  `sequence_id` timestamp default current_timestamp COMMENT '序列标识',
-  `sender` bigint not null COMMENT '发送者',
-  `dialog_type` int not null COMMENT '对话类型',
-  `message_id` bigint not null COMMENT '消息标识',
-  `deleted` int default 0 COMMENT '逻辑删除',
-  PRIMARY KEY (`timeline_id`, `sequence_id`),
-  constraint `fk_timeline_to_dialog` FOREIGN KEY (`dialog_type`) REFERENCES `im_dialog` (`dialog_id`),
-  constraint `fk_timeline_to_groups` FOREIGN KEY (`timeline_id`) REFERENCES `im_groups` (`group_id`),
-  constraint `fk_timeline_to_sc` FOREIGN KEY (`timeline_id`) REFERENCES `im_single_chat` (`single_id`),
-  constraint `fk_timeline_to_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`message_id`),
-  index i_sender_dtype(sender,dialog_type)
-)ENGINE=InnoDB default CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 -- 消息类型表
 DROP TABLE IF EXISTS `im_message_type`;
 CREATE TABLE `im_message_type` (
@@ -188,6 +171,21 @@ CREATE TABLE `im_message` (
   `deleted` int default 0 COMMENT '逻辑删除',
   constraint `fk_message_to_type`FOREIGN KEY (`type`) REFERENCES `im_message_type` (`type_id`),
   constraint `fk_message_to_status` FOREIGN KEY (`status`) REFERENCES `im_message_status` (`status_id`)
+)ENGINE=InnoDB default CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 历史消息
+DROP TABLE IF EXISTS `im_timeline`;
+CREATE TABLE `im_timeline` (
+  `timeline_id` bigint COMMENT '时间线标识',
+  `sequence_id` timestamp default current_timestamp COMMENT '序列标识',
+  `sender` bigint not null COMMENT '发送者',
+  `dialog_type` int not null COMMENT '对话类型',
+  `message_id` bigint not null COMMENT '消息标识',
+  `deleted` int default 0 COMMENT '逻辑删除',
+  PRIMARY KEY (`timeline_id`, `sequence_id`),
+  constraint `fk_timeline_to_dialog` FOREIGN KEY (`dialog_type`) REFERENCES `im_dialog` (`dialog_id`),
+  constraint `fk_timeline_to_message` FOREIGN KEY (`message_id`) REFERENCES `im_message` (`message_id`),
+  index i_sender_dtype(sender,dialog_type)
 )ENGINE=InnoDB default CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 set FOREIGN_KEY_CHECKS = 1;

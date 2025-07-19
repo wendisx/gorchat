@@ -4,7 +4,7 @@ package constant
 const (
 	DEFAULT_SERVER_IP   = "127.0.0.1"
 	DEFAULT_SERVER_PORT = "3000"
-	DEV_ENV_FILE        = "../.dev.env"
+	DEV_ENV_FILE        = ".dev.env"
 	PROD_ENV_FILE       = ".prod.env"
 
 	SESSION_KEY = "Identifier"

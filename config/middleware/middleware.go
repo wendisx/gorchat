@@ -39,10 +39,11 @@ func (md *middleware) ValidatorMiddleware(v any) echo.MiddlewareFunc {
 			}
 			if errs := md.va.Check(body); errs != nil {
 				log.Printf("[middleware] -- (validator) %v\n", errs.Error())
-				return echo.NewHTTPError(http.StatusBadRequest, constant.MsgValidatorFail)
+				return echo.NewHTTPError(http.StatusBadRequest, constant.MsgValidateFail)
 			}
+			// 设置校验对象为 key = body value = body
 			c.Set("body", body)
-			log.Printf("[middleware] -- (validator) %v\n", constant.MsgValidatorSuccess)
+			log.Printf("[middleware] -- (validator) %v\n", constant.MsgValidateSuccess)
 			return next(c)
 		}
 	}
@@ -56,7 +57,7 @@ func (md *middleware) SessionCheckMiddleware(allowNew bool) echo.MiddlewareFunc 
 				err = md.store.Save(c.Request(), c.Response().Writer, session)
 				if err != nil {
 					log.Printf("[middleware] -- (sessioncheck) %v\n", err.Error())
-					return echo.NewHTTPError(http.StatusInternalServerError, constant.MsgServerInternal)
+					return echo.NewHTTPError(http.StatusInternalServerError, constant.MsgServerInternalErr)
 				}
 				log.Printf("[middleware] -- (sessioncheck) status: bypass\n")
 			} else {
@@ -67,9 +68,9 @@ func (md *middleware) SessionCheckMiddleware(allowNew bool) echo.MiddlewareFunc 
 					err = md.store.Save(c.Request(), c.Response().Writer, session)
 					if err != nil {
 						log.Printf("[middleware] -- (sessioncheck) %v\n", err.Error())
-						return echo.NewHTTPError(http.StatusInternalServerError, constant.MsgServerInternal)
+						return echo.NewHTTPError(http.StatusInternalServerError, constant.MsgServerInternalErr)
 					}
-					return echo.NewHTTPError(http.StatusUnauthorized, constant.MsgUnAuthorized)
+					return echo.NewHTTPError(http.StatusUnauthorized, constant.MsgNotAuthenticate)
 				}
 
 			}

@@ -26,16 +26,16 @@ type SignupReq struct {
 }
 
 type SignupRes struct {
-	UserId string `json:"userId"`
+	UserId int64 `json:"userId"`
 }
 
 type LoginReq struct {
-	UserId       string `json:"userId" valid:"required,number,min=6"`
+	UserId       int64  `json:"userId" valid:"required,min=100000"`
 	UserPassword string `json:"userPassword" valid:"required,min=8,max=20"`
 }
 
 type LoginRes struct {
-	UserId       string `json:"userId"`
+	UserId       int64  `json:"userId"`
 	UserName     string `json:"userName"`
 	UserEmail    string `json:"userEmail"`
 	UserPhone    string `json:"userPhone"`
@@ -47,7 +47,7 @@ type LoginRes struct {
 }
 
 type UpdateInfoReq struct {
-	UserId       string `json:"userId" valid:"required,number,min=6"`
+	UserId       int64  `json:"userId" valid:"required,min=100000"`
 	UserName     string `json:"userName"`
 	UserEmail    string `json:"userEmail"`
 	UserPhone    string `json:"userPhone"`
@@ -70,7 +70,7 @@ type UpdateInfoRes struct {
 }
 
 type GetUserdetailRes struct {
-	UserId       string `json:"userId"`
+	UserId       int64  `json:"userId"`
 	UserName     string `json:"userName"`
 	UserEmail    string `json:"userEmail"`
 	UserPhone    string `json:"userPhone"`
@@ -84,7 +84,7 @@ type GetUserdetailRes struct {
 type SearchUserReq struct {
 	CurrentPage int    `json:"currentPage" valid:"required,min=1"`
 	PageSize    int    `json:"pageSize" valid:"required,min=1,max=8"`
-	UserId      string `json:"userId"`
+	UserId      int64  `json:"userId" valid:"required,min=100000"`
 	UserName    string `json:"userName"`
 }
 

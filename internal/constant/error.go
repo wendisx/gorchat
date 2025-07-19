@@ -31,6 +31,12 @@ const (
 	ErrUserDeleteFail   // 删除失败
 	ErrGetUserDetail    // 获取用户详细信息错误
 	ErrSearchUser       // 搜索错误
+
+	ErrSingleInviteFail    // 单聊邀请失败
+	ErrSingleAcceptFail    // 单聊接受失败
+	ErrSingleUpdateFail    // 单聊更新失败
+	ErrSingleGetDetailFail // 单聊详细信息获取失败
+	ErrSingleDeleteFail    // 单聊删除失败
 )
 
 // 错误信息
@@ -62,6 +68,12 @@ const (
 	MsgUserDeleteFail    = "用户删除失败"
 	MsgGetUserDetailFail = "获取用户详细信息失败"
 	MsgSearchUserFail    = "搜索用户失败"
+
+	MsgSingleInviteFail    = "单聊邀请失败"
+	MsgSingleAcceptFail    = "单聊接受失败"
+	MsgSingleUpdateFail    = "单聊更新失败"
+	MsgSingleGetDetailFail = "单聊详细信息获取失败"
+	MsgSingleDeleteFail    = "单聊删除失败"
 )
 
 // 一般提示信息
@@ -74,4 +86,10 @@ const (
 	MsgUserDeleteSuccess    = "用户删除成功"
 	MsgGetUserDetailSuccess = "获取用户详细信息成功"
 	MsgSearchUserSuccess    = "搜索用户成功"
+
+	MsgSingleInviteSuccess    = "单聊邀请成功"
+	MsgSingleAcceptSuccess    = "单聊接受成功"
+	MsgSingleUpdateSuccess    = "单聊更新成功"
+	MsgSingleGetDetailSuccess = "单聊详细信息获取成功"
+	MsgSingleDeleteSuccess    = "单聊删除成功"
 )

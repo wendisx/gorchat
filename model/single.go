@@ -26,6 +26,7 @@ type SingleInvite struct {
 
 type SingleAccept struct {
 	SingleId        int64  `json:"singleId"`
+	InviteeId       int64  `json:"inviteeId"`
 	InviterNickname string `json:"inviterNickname"`
 	InviteeDisturb  int    `json:"inviteeDisturb"`
 	Deleted         int    `json:"deleted"`
@@ -47,4 +48,88 @@ type SingleInvitee struct {
 	InviterNickname string `json:"inviterNickname"`
 	InviterName     string `json:"inviterName"`
 	InviteeDisturb  int    `json:"inviteeDisturb"`
+}
+
+type SingleDelete struct {
+	SingleId  int64 `json:"singleId"`
+	InviterId int64 `json:"inviterId"`
+	InviteeId int64 `json:"inviteeId"`
+}
+
+type InviteReq struct {
+	InviterId       int64  `json:"inviterId"`
+	InviteeId       int64  `json:"inviteeId"`
+	InviteeNickname string `json:"inviteeNickname"`
+	InviterDisturb  int    `json:"inviterDisturb"`
+}
+
+type InviteRes struct {
+	SingleId        int64  `json:"singleId"`
+	InviteeId       int64  `json:"inviteeId"`
+	InviteeName     string `json:"inviteeName"`
+	InviteeNickname string `json:"inviteeNickname"`
+	InviterDisturb  int    `json:"inviterDisturb"`
+}
+
+type AcceptReq struct {
+	SingleId        int64  `json:"singleId"`
+	InviteeId       int64  `json:"inviteeId"`
+	InviterNickname string `json:"inviterNickname"`
+	InviteeDisturb  int    `json:"inviteeDisturb"`
+}
+
+type AcceptRes struct {
+	SingleId        int64  `json:"singleId"`
+	InviterId       int64  `json:"inviterId"`
+	InviterName     string `json:"inviterName"`
+	InviterNickname string `json:"inviterNickname"`
+	InviteeDisturb  int    `json:"inviteeDisturb"`
+}
+
+type UpdateNicknameReq struct {
+	SingleId    int64  `json:"singleId"`
+	IsInviter   bool   `json:"isInviter"`
+	UserId      int64  `json:"userId"`
+	SetNickname string `json:"setNickname"`
+	UserDisturb int    `json:"userDisturb"`
+}
+
+type UpdateNicknameRes struct {
+	SingleId     int64  `json:"singleId"`
+	UserId       int64  `json:"userId"`
+	UserName     string `json:"userName"`
+	UserNickname string `json:"userNickname"`
+}
+
+type UpdateDisturbReq struct {
+	SingleId     int64  `json:"singleId"`
+	IsInviter    bool   `json:"isInviter"`
+	UserId       int64  `json:"userId"`
+	SetDisturb   int    `json:"userDisturb"`
+	UserNickname string `json:"userNickname"`
+}
+
+type UpdateDisturbRes struct {
+	SingleId    int64 `json:"singleId"`
+	UserDisturb int   `json:"userDisturb"`
+}
+
+type GetDetailReq struct {
+	SingleId  int64 `json:"singleId"`
+	IsInviter bool  `json:"isInviter"`
+	UserId    int64 `json:"userId"`
+}
+
+type GetDetailRes struct {
+	SingleId     int64  `json:"singleId"`
+	UserId       int64  `json:"userId"`
+	UserName     string `json:"userName"`
+	UserNickname string `json:"userNickname"`
+	UserDisturb  int    `json:"userDisturb"`
+}
+
+type DeleteReq struct {
+	SingleId  int64 `json:"singleId"`
+	InviterId int64 `json:"inviterId"`
+	InviteeId int64 `json:"inviteeId"`
 }

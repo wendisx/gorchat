@@ -48,7 +48,7 @@ func (h *userHandler) Signup(c echo.Context) error {
 		}
 	}
 	return h.res.Success(c, http.StatusOK, constant.MsgUserSignupSuccess, model.SignupRes{
-		UserId: strconv.FormatInt(userId, 10),
+		UserId: userId,
 	})
 }
 
@@ -63,7 +63,7 @@ func (h *userHandler) Login(c echo.Context) error {
 		}
 	}
 	loginRes := model.LoginRes{
-		UserId:       strconv.FormatInt(user.UserId, 10),
+		UserId:       user.UserId,
 		UserName:     user.UserName,
 		UserEmail:    user.UserEmail,
 		UserPhone:    user.UserPhone,
@@ -78,12 +78,8 @@ func (h *userHandler) Login(c echo.Context) error {
 
 func (h *userHandler) UpdateInfo(c echo.Context) error {
 	updateInfoReq := c.Get("body").(*model.UpdateInfoReq)
-	userid, err := strconv.Atoi(updateInfoReq.UserId)
-	if err != nil {
-		return h.res.Fail(c, http.StatusBadRequest, int(constant.ErrBadRequest), constant.MsgBadRequest)
-	}
 	updateUser := &model.User{
-		UserId:       int64(userid),
+		UserId:       updateInfoReq.UserId,
 		UserName:     updateInfoReq.UserName,
 		UserEmail:    updateInfoReq.UserEmail,
 		UserPhone:    updateInfoReq.UserPhone,
@@ -142,7 +138,7 @@ func (h *userHandler) GetUserdetail(c echo.Context) error {
 		return err
 	}
 	getUserdetailRes := model.GetUserdetailRes{
-		UserId:       strconv.FormatInt(user.UserId, 10),
+		UserId:       user.UserId,
 		UserName:     user.UserName,
 		UserEmail:    user.UserEmail,
 		UserPhone:    user.UserPhone,
@@ -159,17 +155,7 @@ func (h *userHandler) SearchUser(c echo.Context) error {
 	searchUserReq := c.Get("body").(*model.SearchUserReq)
 	var userBasic model.UserBasic
 	userBasic.UserName = searchUserReq.UserName
-	userIdRegex := regexp.MustCompile(`^\d+$`)
-	ok := userIdRegex.MatchString(searchUserReq.UserId)
-	if !ok {
-		userBasic.UserId = 0
-	} else {
-		userId, err := strconv.Atoi(searchUserReq.UserId)
-		if err != nil {
-			return h.res.Fail(c, http.StatusBadRequest, int(constant.ErrBadRequest), constant.MsgBadRequest)
-		}
-		userBasic.UserId = int64(userId)
-	}
+	userBasic.UserId = searchUserReq.UserId
 	page := &model.Page[model.UserBasic]{
 		CurrentPage: searchUserReq.CurrentPage,
 		PageSize:    searchUserReq.PageSize,
