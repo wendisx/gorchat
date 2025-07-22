@@ -67,8 +67,9 @@ CREATE TABLE `im_groups_detail` (
   `group_id` bigint PRIMARY KEY COMMENT '群号',
   `group_avatar` varchar(255) default '' COMMENT '群头像',
   `max_size` int not null COMMENT '群容量',
-  `current_size` int default 1 COMMENT '群当前人数',
-  `online_size` int default 1 COMMENT '在线人数',
+  `current_size` int not null default 0 COMMENT '群当前人数',
+  -- 暂时不考虑 online_size 字段实现，显然，离线属于账号的特定状态，可以作为 user 本身的一个属性，而不是群属性
+  -- `online_size` int default 1 COMMENT '在线人数',
   `created_time` timestamp default current_timestamp COMMENT '群创建时间',
   `updated_time` timestamp default current_timestamp COMMENT '群更新时间',
   constraint `fk_gd_to_group` FOREIGN KEY (`group_id`) REFERENCES `im_groups` (`group_id`) on delete cascade

@@ -91,6 +91,14 @@ func (r *singleRepository) InsertUnAccepted(ctx context.Context, singleInvite *m
 	}
 	err = tx.Commit()
 	if err != nil {
+		tx.Rollback()
+		log.Error(
+			r.logger,
+			"transaction commit fail",
+			map[string]any{
+				"error": err.Error(),
+			},
+		)
 		return &model.DError{
 			Code:    constant.ErrTransactionFail,
 			Message: constant.MsgOperationFail,
@@ -229,6 +237,14 @@ func (r *singleRepository) UpdateByInviter(ctx context.Context, singleInviter *m
 	}
 	err = tx.Commit()
 	if err != nil {
+		tx.Rollback()
+		log.Error(
+			r.logger,
+			"transaction commit fail",
+			map[string]any{
+				"error": err.Error(),
+			},
+		)
 		return &model.DError{
 			Code:    constant.ErrTransactionFail,
 			Message: constant.MsgOperationFail,
@@ -297,6 +313,14 @@ func (r *singleRepository) UpdateByInvitee(ctx context.Context, singleInvitee *m
 	}
 	err = tx.Commit()
 	if err != nil {
+		tx.Rollback()
+		log.Error(
+			r.logger,
+			"transaction commit fail",
+			map[string]any{
+				"error": err.Error(),
+			},
+		)
 		return &model.DError{
 			Code:    constant.ErrTransactionFail,
 			Message: constant.MsgOperationFail,
@@ -367,6 +391,14 @@ func (r *singleRepository) UpdateByAccept(ctx context.Context, singleAccept *mod
 	}
 	err = tx.Commit()
 	if err != nil {
+		tx.Rollback()
+		log.Error(
+			r.logger,
+			"transaction commit fail",
+			map[string]any{
+				"error": err.Error(),
+			},
+		)
 		return &model.DError{
 			Code:    constant.ErrTransactionFail,
 			Message: constant.MsgOperationFail,
@@ -436,6 +468,14 @@ func (r *singleRepository) Update(ctx context.Context, single *model.Single) err
 	}
 	err = tx.Commit()
 	if err != nil {
+		tx.Rollback()
+		log.Error(
+			r.logger,
+			"transaction commit fail",
+			map[string]any{
+				"error": err.Error(),
+			},
+		)
 		return &model.DError{
 			Code:    constant.ErrTransactionFail,
 			Message: constant.MsgOperationFail,
@@ -499,6 +539,14 @@ func (r *singleRepository) Delete(ctx context.Context, single *model.SingleDelet
 	}
 	err = tx.Commit()
 	if err != nil {
+		tx.Rollback()
+		log.Error(
+			r.logger,
+			"transaction commit fail",
+			map[string]any{
+				"error": err.Error(),
+			},
+		)
 		return &model.DError{
 			Code:    constant.ErrTransactionFail,
 			Message: constant.MsgOperationFail,

@@ -37,6 +37,17 @@ const (
 	ErrSingleUpdateFail    // 单聊更新失败
 	ErrSingleGetDetailFail // 单聊详细信息获取失败
 	ErrSingleDeleteFail    // 单聊删除失败
+
+	ErrGroupCreateFail      // 群聊创建失败
+	ErrGroupJoinFail        // 群聊加入失败
+	ErrGroupUpdateFail      // 群聊更新失败
+	ErrGroupUpdateUserFail  // 群聊设置失败
+	ErrGroupDeleteFail      // 群聊删除失败
+	ErrGroupDeleteUserFail  // 删除用户失败
+	ErrGroupGetDetailFail   // 用户群设置获取失败
+	ErrGroupSearchUserFail  // 搜索用户失败
+	ErrGroupSearchFail      // 群搜索失败
+	ErrGroupGetAllUsersFail // 群获取用户失败
 )
 
 // 错误信息
@@ -74,6 +85,17 @@ const (
 	MsgSingleUpdateFail    = "单聊更新失败"
 	MsgSingleGetDetailFail = "单聊详细信息获取失败"
 	MsgSingleDeleteFail    = "单聊删除失败"
+
+	MsgGroupCreateFail      = "群聊创建失败"
+	MsgGroupJoinFail        = "群聊加入失败"
+	MsgGroupUpdateFail      = "群聊更新失败"
+	MsgGroupUpdateUserFail  = "群聊设置失败"
+	MsgGroupDeleteFail      = "群聊删除失败"
+	MsgGroupDeleteUserFail  = "删除用户失败"
+	MsgGroupGetDetailFail   = "用户群设置获取失败"
+	MsgGroupSearchUserFail  = "搜索用户失败"
+	MsgGroupSearchFail      = "群搜索失败"
+	MsgGroupGetAllUsersFail = "群用户返回失败"
 )
 
 // 一般提示信息
@@ -92,4 +114,15 @@ const (
 	MsgSingleUpdateSuccess    = "单聊更新成功"
 	MsgSingleGetDetailSuccess = "单聊详细信息获取成功"
 	MsgSingleDeleteSuccess    = "单聊删除成功"
+
+	MsgGroupCreateSuccess      = "群聊创建成功"
+	MsgGroupJoinSuccess        = "群聊加入成功"
+	MsgGroupUpdateSuccess      = "群聊更新成功"
+	MsgGroupUpdateUserSuccess  = "群聊设置成功"
+	MsgGroupDeleteSuccess      = "群聊删除成功"
+	MsgGroupDeleteUserSuccess  = "删除用户成功"
+	MsgGroupGetDetailSuccess   = "用户群设置获取成功"
+	MsgGroupSearchUserSuccess  = "搜索用户成功"
+	MsgGroupSearchSuccess      = "群搜索成功"
+	MsgGroupGetAllUsersSuccess = "群用户返回成功"
 )
