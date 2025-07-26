@@ -83,7 +83,8 @@ serious warnings.In a qualified system, most warnings should exist in this form.
 The early warning system only needs to be reasonable because it is only an auxiliary 
 means. Modern software often embeds this part and tries to expose it. This is 
 actually a means of program optimization. Different people often use it to bring 
-different results, which helps maintain and improve it.Reasonable program configuration is obviously very important. In order to enable the program to run in different environments, 
+different results, which helps maintain and improve it.Reasonable program configuration is obviously 
+very important. In order to enable the program to run in different environments, 
 I try to configure them reasonably. There is no limit to the configuration file. In fact,
 any configuration file with a suffix will work when there is a corresponding interpreter. 
 Most of the time, there is no reason to choose to write an unnecessary interpreter just 
